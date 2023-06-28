@@ -1,13 +1,17 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { Subject, concatMap, first, forkJoin, map, mergeMap, reduce, switchMap, take, filter, takeWhile, every, find, findIndex, isEmpty, max, min, count, tap, delay, partition, last, takeLast, startWith, endWith, Observable } from 'rxjs';
+import { Subject, concatMap, first, forkJoin, map, mergeMap, reduce, switchMap, take, filter, takeWhile, every, find, findIndex, isEmpty, max, min, count, tap, delay, partition, last, takeLast, startWith, endWith, Observable, distinct, from, range, of, interval } from 'rxjs';
 import { SharedService } from './shared.service';
 
 export interface Model {
   "id": number;
   "userId": number;
   "title": string;
+}
+
+export interface Operators {
+  name: string;
 }
 
 @Component({
@@ -23,6 +27,81 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private $destroy = new Subject();
   public userId?: number;
+
+  protected Operators: Operators[] = [
+    {
+      name: 'Filter'
+    },
+    {
+      name: 'IsEmpty'
+    },
+    {
+      name: 'Max'
+    },
+    {
+      name: 'Min'
+    },
+    {
+      name: 'Reduce'
+    },
+    {
+      name: 'Count'
+    },
+    {
+      name: 'Tap'
+    },
+    {
+      name: 'ForkJoin'
+    },
+    {
+      name: 'MergeMap'
+    },
+    {
+      name: 'SwitchMap'
+    },
+    {
+      name: 'First'
+    },
+    {
+      name: 'Last'
+    },
+    {
+      name: 'Take'
+    },
+    {
+      name: 'Take Last'
+    },
+    {
+      name: 'Take While'
+    },
+    {
+      name: 'Startwith'
+    },
+    {
+      name: 'Endwith'
+    },
+    {
+      name: 'Find'
+    },
+    {
+      name: 'FindIndex'
+    },
+    {
+      name: 'Distinct'
+    },
+    {
+      name: 'From'
+    },
+    {
+      name: 'Range'
+    },
+    {
+      name: 'Interval'
+    },
+    {
+      name:'Of'
+    }
+  ];
 
   constructor(private readonly shared: SharedService, private readonly http: HttpClient) {
   }
@@ -94,9 +173,24 @@ export class AppComponent implements OnInit, OnDestroy {
     let findOp = this.shared.getPostAlbums().pipe(mergeMap((data: any) => data), find((data: any) => data.userId == 10));
 
     // FindIndex
-    let findIndexOp=this.shared.getPostAlbums().pipe(mergeMap((data: any) => data), findIndex((data: any) => data.userId == 10));
+    let findIndexOp = this.shared.getPostAlbums().pipe(mergeMap((data: any) => data), findIndex((data: any) => data.userId == 10));
 
-    findIndexOp.subscribe((data) => console.log(data));
+    // Distinct
+    let distinctOp = this.shared.getPostAlbums().pipe(mergeMap((data: any) => data), distinct((data: any) => data.userId));
+
+    //From
+    let fruits = from([{ name: 'Apple' }, { name: 'Mango' }]);
+
+    // range
+    let numbers = range(1, 100);
+
+    // of
+    let off = of(1, 2, 3, 4);
+
+    // Interval
+    let interVal = interval(100);
+
+    off.subscribe((data) => console.log(data));
 
   }
 
