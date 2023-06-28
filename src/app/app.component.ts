@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { Subject, concatMap, first, forkJoin, map, mergeMap, reduce, switchMap, take, filter, takeWhile, every, find, findIndex, isEmpty, max, min, count, tap, delay, partition, last, takeLast, startWith, endWith, Observable, distinct, from, range, of, interval } from 'rxjs';
+import { Subject, concatMap, first, forkJoin, map, mergeMap, reduce, switchMap, take, filter, takeWhile, every, find, findIndex, isEmpty, max, min, count, tap, delay, partition, last, takeLast, startWith, endWith, Observable, distinct, from, range, of, interval, combineLatest } from 'rxjs';
 import { SharedService } from './shared.service';
 
 export interface Model {
@@ -99,7 +99,13 @@ export class AppComponent implements OnInit, OnDestroy {
       name: 'Interval'
     },
     {
-      name:'Of'
+      name: 'Of'
+    },
+    {
+      name: 'CombineLatest'
+    },
+    {
+      name: 'Delay'
     }
   ];
 
@@ -190,7 +196,15 @@ export class AppComponent implements OnInit, OnDestroy {
     // Interval
     let interVal = interval(100);
 
-    off.subscribe((data) => console.log(data));
+    // CombineLatest
+    let combine = combineLatest([album, posts, albums]);
+
+    // delay
+    let d = range(1, 10).pipe(delay(5000))
+
+
+
+    d.subscribe((data) => console.log(data));
 
   }
 
