@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import {
@@ -58,6 +58,8 @@ export interface Operators {
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'rxjs-operators';
+
+  protected shared = inject(SharedService);
 
   private $destroy = new Subject();
   public userId?: number;
@@ -147,9 +149,8 @@ export class AppComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private readonly shared: SharedService,
     private readonly http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Map
@@ -209,15 +210,15 @@ export class AppComponent implements OnInit, OnDestroy {
     let fork = forkJoin([posts, albums, album]).pipe(take(1));
 
     // Mergemap
-    let mergeMapOp = this.shared.getPostAlbums().pipe(
-      switchMap((data: any) => data),
-      filter((data: any) => data.id == 10),
-      mergeMap((data) =>
-        this.http.get(
-          `https://jsonplaceholder.typicode.com/posts?userId=${data.userId}`
-        )
-      )
-    );
+    // let mergeMapOp = this.shared.getPostAlbums().pipe(
+    //   switchMap((data: any) => data),
+    //   filter((data: any) => data.id == 10),
+    //   mergeMap((data) =>
+    //     this.http.get(
+    //       `https://jsonplaceholder.typicode.com/posts?userId=${data.userId}`
+    //     )
+    //   )
+    // );
 
     // SwitchMap
     let switchOp = this.shared.getPostAlbums().pipe(
@@ -312,7 +313,30 @@ export class AppComponent implements OnInit, OnDestroy {
     let albumss = this.shared.getPostsData();
     let result = concat(post, albumss);
 
-    result.subscribe((data) => console.log(data));
+    let data = of(
+      [
+        {
+          'name': 'hello'
+        },
+        {
+          'name': 'welcome'
+        }
+      ]);
+
+    this.shared.getTodos().pipe(switchMap((data: any) => data),
+      ((data) => data), filter((val: any) => {
+        return val?.id === 1
+      })).subscribe((data) => console.log(data));
+
+    // of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    //   .pipe(
+    //     filter(val => {
+    //       return val % 2 == 0;
+    //     }),
+    //   )
+    //   .subscribe(val => console.log(val));
+
+
   }
 
   ngOnDestroy(): void {

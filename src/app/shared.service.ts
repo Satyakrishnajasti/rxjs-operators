@@ -17,4 +17,8 @@ export class SharedService {
   getPostAlbums(): Observable<Model> {
     return this.http.get<Model>('https://jsonplaceholder.typicode.com/albums');
   }
+
+  getTodos() {
+    return this.http.get('https://jsonplaceholder.typicode.com/todos');
+  }
 }
