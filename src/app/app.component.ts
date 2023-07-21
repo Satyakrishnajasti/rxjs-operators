@@ -38,7 +38,11 @@ import {
   skip,
   merge,
   skipLast,
-  skipWhile
+  skipWhile,
+  single,
+  elementAt,
+  distinctUntilChanged,
+  ignoreElements
 } from 'rxjs';
 import { SharedService } from './shared.service';
 
@@ -70,91 +74,106 @@ export class AppComponent implements OnInit, OnDestroy {
 
   protected Operators: Operators[] = [
     {
-      name: 'Filter',
+      name: 'filter',
     },
     {
-      name: 'IsEmpty',
+      name: 'isEmpty',
     },
     {
-      name: 'Max',
+      name: 'max',
     },
     {
-      name: 'Min',
+      name: 'min',
     },
     {
-      name: 'Reduce',
+      name: 'reduce',
     },
     {
-      name: 'Count',
+      name: 'count',
     },
     {
-      name: 'Tap',
+      name: 'tap',
     },
     {
-      name: 'ForkJoin',
+      name: 'forkJoin',
     },
     {
-      name: 'MergeMap',
+      name: 'mergeMap',
     },
     {
-      name: 'SwitchMap',
+      name: 'switchMap',
     },
     {
-      name: 'First',
+      name: 'first',
     },
     {
-      name: 'Last',
+      name: 'last',
     },
     {
-      name: 'Take',
+      name: 'take',
     },
     {
-      name: 'Take Last',
+      name: 'takeLast',
     },
     {
-      name: 'Take While',
+      name: 'takeWhile',
     },
     {
-      name: 'Startwith',
+      name: 'startWith',
     },
     {
-      name: 'Endwith',
+      name: 'endWith',
     },
     {
-      name: 'Find',
+      name: 'find',
     },
     {
-      name: 'FindIndex',
+      name: 'findIndex',
     },
     {
-      name: 'Distinct',
+      name: 'distinct',
     },
     {
-      name: 'From',
+      name: 'from',
     },
     {
-      name: 'Range',
+      name: 'range',
     },
     {
-      name: 'Interval',
+      name: 'interval',
     },
     {
-      name: 'Of',
+      name: 'of',
     },
     {
-      name: 'CombineLatest',
+      name: 'combineLatest',
     },
     {
-      name: 'Delay',
+      name: 'delay',
     },
     {
-      name: 'Concat',
+      name: 'concat',
     },
     {
-      name: 'Skip'
+      name: 'skip'
     },
     {
-      name: 'SkipLast'
+      name: 'skipLast'
+    },
+    {
+      name: 'merge'
+    },
+    {
+      name: 'partition'
+    },
+    {
+      name: 'elementAt'
+    },
+    {
+      name: 'distinctUntilChanged'
+    },
+    {
+      name: 'ignoreElements'
     }
   ];
 
@@ -366,15 +385,39 @@ export class AppComponent implements OnInit, OnDestroy {
     const merged = merge(item1, item2);
 
     // Partition
-    let part = this.shared.getPostAlbums();
-    part.subscribe((data: any) => {
-      const [even, odd] = partition(data, (value: any, index: number) => index > 0 && index < 10);
-      even.subscribe((data) => console.log(data));
-      odd.subscribe((data) => console.log(data));
+    // let part = this.shared.getPostAlbums();
+    // part.subscribe((data: any) => {
+    //   const [even, odd] = partition(data, (value: any, index: number) => index > 0 && index < 10);
+    //   even.subscribe((data) => console.log(data));
+    //   odd.subscribe((data) => console.log(data));
+    // });
+
+    //elementAt
+    let element = this.shared.getPostAlbums();
+    element.pipe(switchMap((element: any) => element), tap((element) => console.log(element)), elementAt(15));
+
+    distinctOp.subscribe((data) => data);
+
+    //distinctUntilChanged
+    let dup = this.shared.getPostAlbums();
+    dup.pipe(switchMap((element: any) => element), distinctUntilChanged((prev: any, curr: any): any => {
+      return (
+        prev.id === curr.id || prev.userId === curr.userId
+      )
+    })).subscribe((data) => data);
+
+    // switchMap
+    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(map((element2) => ({ element1, element2 }))))).subscribe((data) => console.log(data));
+    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(switchMap((elementt2) => this.shared.getTodos().pipe(map((element3) => ({ element1, elementt2, element3 }))))))).subscribe((data) => console.log(data));
+
+    //ignoreElements
+    let ignore = this.shared.getPostAlbums();
+
+    ignore.pipe(ignoreElements()).subscribe({
+      next: (value) => console.log(value),
+      error: (err) => console.log(err),
+      complete: () => console.log('ignoreElements')
     });
-
-    
-
 
 
 
