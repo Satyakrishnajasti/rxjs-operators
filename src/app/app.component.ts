@@ -333,10 +333,9 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       ]);
 
-    // this.shared.getTodos().pipe(switchMap((data: any) => data),
-    //   ((data) => data), filter((val: any) => {
-    //     return val?.id === 1
-    //   })).subscribe((data) => console.log(data));
+    // this.shared.getTodos().pipe(switchMap((data: any) => data), filter((val: any) => {
+    //   return val?.id === 1
+    // })).subscribe((data) => console.log(data));
 
     // of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     //   .pipe(
@@ -354,33 +353,28 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // SkipWhile
     let skipWhileOp = this.shared.getPostAlbums().pipe(switchMap((element: any) => element), tap((element) => (element)), skipWhile((element: any, index) => {
-    
-
       if (element.userId && element.id) {
         console.log(element.userId);
       }
       return Number(element.userId) > 3 && (element.id) == 1;
     }));
 
-    of( 2, 4, 5, 6, 7, 8, 9, 10)
-    .pipe(
-      skipWhile(val => val / 2==0),
-    )
-    .subscribe(val => console.log(val));
+    //merge
+    let item1 = this.shared.getPostAlbums();
+    let item2 = this.shared.getPostsData();
 
+    const merged = merge(item1, item2);
 
+    // Partition
+    let part = this.shared.getPostAlbums();
+    part.subscribe((data: any) => {
+      const [even, odd] = partition(data, (value: any, index: number) => index > 0 && index < 10);
+      even.subscribe((data) => console.log(data));
+      odd.subscribe((data) => console.log(data));
+    });
 
-    skipWhileOp.pipe(skip(10)).subscribe({
-      next: (value) => {
-        console.log(value);
-      },
-      error: () => {
+    
 
-      },
-      complete: () => {
-
-      }
-    })
 
 
 
