@@ -35,6 +35,10 @@ import {
   interval,
   combineLatest,
   concat,
+  skip,
+  merge,
+  skipLast,
+  skipWhile
 } from 'rxjs';
 import { SharedService } from './shared.service';
 
@@ -146,6 +150,12 @@ export class AppComponent implements OnInit, OnDestroy {
     {
       name: 'Concat',
     },
+    {
+      name: 'Skip'
+    },
+    {
+      name: 'SkipLast'
+    }
   ];
 
   constructor(
@@ -323,10 +333,10 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       ]);
 
-    this.shared.getTodos().pipe(switchMap((data: any) => data),
-      ((data) => data), filter((val: any) => {
-        return val?.id === 1
-      })).subscribe((data) => console.log(data));
+    // this.shared.getTodos().pipe(switchMap((data: any) => data),
+    //   ((data) => data), filter((val: any) => {
+    //     return val?.id === 1
+    //   })).subscribe((data) => console.log(data));
 
     // of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     //   .pipe(
@@ -335,6 +345,43 @@ export class AppComponent implements OnInit, OnDestroy {
     //     }),
     //   )
     //   .subscribe(val => console.log(val));
+
+    // Skip
+    let skipOp = range(1, 100);
+
+    // SkipLast
+    let skipLastOp = this.shared.getPostsData().pipe(mergeMap((element: any) => element), skipLast(80));
+
+    // SkipWhile
+    let skipWhileOp = this.shared.getPostAlbums().pipe(switchMap((element: any) => element), tap((element) => (element)), skipWhile((element: any, index) => {
+    
+
+      if (element.userId && element.id) {
+        console.log(element.userId);
+      }
+      return Number(element.userId) > 3 && (element.id) == 1;
+    }));
+
+    of( 2, 4, 5, 6, 7, 8, 9, 10)
+    .pipe(
+      skipWhile(val => val / 2==0),
+    )
+    .subscribe(val => console.log(val));
+
+
+
+    skipWhileOp.pipe(skip(10)).subscribe({
+      next: (value) => {
+        console.log(value);
+      },
+      error: () => {
+
+      },
+      complete: () => {
+
+      }
+    })
+
 
 
   }
