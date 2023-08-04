@@ -42,7 +42,12 @@ import {
   single,
   elementAt,
   distinctUntilChanged,
-  ignoreElements
+  ignoreElements,
+  exhaustMap,
+  debounceTime,
+  sampleTime,
+  buffer,
+  mapTo
 } from 'rxjs';
 import { SharedService } from './shared.service';
 
@@ -174,6 +179,18 @@ export class AppComponent implements OnInit, OnDestroy {
     },
     {
       name: 'ignoreElements'
+    },
+    {
+      name: 'concatMap'
+    },
+    {
+      name: 'exhaustMap'
+    },
+    {
+      name: 'debounceTime'
+    },
+    {
+      name: 'mapTo'
     }
   ];
 
@@ -394,9 +411,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     //elementAt
     let element = this.shared.getPostAlbums();
-    element.pipe(switchMap((element: any) => element), tap((element) => console.log(element)), elementAt(15));
-
-    distinctOp.subscribe((data) => data);
+    element.pipe(concatMap((element: any) => element), tap((element) => (element)), elementAt(15)).subscribe((data) => data);
 
     //distinctUntilChanged
     let dup = this.shared.getPostAlbums();
@@ -407,21 +422,44 @@ export class AppComponent implements OnInit, OnDestroy {
     })).subscribe((data) => data);
 
     // switchMap
-    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(map((element2) => ({ element1, element2 }))))).subscribe((data) => console.log(data));
-    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(switchMap((elementt2) => this.shared.getTodos().pipe(map((element3) => ({ element1, elementt2, element3 }))))))).subscribe((data) => console.log(data));
+    // this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(map((element2) => ({ element1, element2 }))))).subscribe((data) => console.log(data));
+    // this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(switchMap((elementt2) => this.shared.getTodos().pipe(map((element3) => ({ element1, elementt2, element3 }))))))).subscribe((data) => console.log(data));
 
-    //ignoreElements
-    let ignore = this.shared.getPostAlbums();
+    // //ignoreElements
+    // let ignore = this.shared.getPostAlbums();
 
-    ignore.pipe(ignoreElements()).subscribe({
-      next: (value) => console.log(value),
-      error: (err) => console.log(err),
-      complete: () => console.log('ignoreElements')
-    });
+    // ignore.pipe(ignoreElements()).subscribe({
+    //   next: (value) => console.log(value),
+    //   error: (err) => console.log(err),
+    //   complete: () => console.log('ignoreElements')
+    // });
 
+    //this.orders.pipe(concatMap((order) => this.prepOrder(order))).subscribe((data) => console.log(data));
 
+    from([1, 2, 3]).pipe((concatMap((element) => this.http.get('https://jsonplaceholder.typicode.com/posts/' + element)))).subscribe((data) => data);
+
+    // debounceTime
+    let debounce = from([1, 2, 3, 4, 5]).pipe(debounceTime(20000)).subscribe((data) => data);
+
+    // mapTo
+    let mapto = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), mapTo('Welcome')).subscribe((data) => console.log(data));
 
   }
+
+  //   -🤯mergeMap: I'm a hard worker, I can prepare multiple orders at the same time ! But I don't respect orders sequence.
+
+  // -😇concatMap: I respect orders sequence! You will get your order as soon as I finish what I'm currently doing.
+
+  // -🙄exhaustMap: I'm exhausted ! when I prepare an order, I won't listen to any other order.
+
+  // -😈switchMap: I'm mean ! your order will be in trash if I receive new one.
+
+  private prepOrder(order: any) {
+    const deplayTime = Math.floor(Math.random() * 1000) + 1;
+    return of(`I'm ${order} I'm order after ${deplayTime} ms`).pipe(delay(deplayTime));
+  }
+  orders = from(['Order 1', 'Order 2', "Order 3", "Order 4"]);
+
 
   ngOnDestroy(): void {
     this.$destroy.next(undefined);
