@@ -47,7 +47,9 @@ import {
   debounceTime,
   sampleTime,
   buffer,
-  mapTo
+  mapTo,
+  pairwise,
+  pluck
 } from 'rxjs';
 import { SharedService } from './shared.service';
 
@@ -191,6 +193,9 @@ export class AppComponent implements OnInit, OnDestroy {
     },
     {
       name: 'mapTo'
+    },
+    {
+      name: 'pluck'
     }
   ];
 
@@ -228,7 +233,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Reduce
     let reduceOp: Observable<any> = this.shared.getPostAlbums().pipe(
       switchMap((data: any) => data),
-      reduce((a: any, b: any) => Number(a.id) + Number(b.id))
+      reduce((a: any, b: any) => Number(a) + Number(b.userId), 0)
     );
 
     // Min
@@ -422,18 +427,27 @@ export class AppComponent implements OnInit, OnDestroy {
     })).subscribe((data) => data);
 
     // switchMap
-    // this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(map((element2) => ({ element1, element2 }))))).subscribe((data) => console.log(data));
-    // this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(switchMap((elementt2) => this.shared.getTodos().pipe(map((element3) => ({ element1, elementt2, element3 }))))))).subscribe((data) => console.log(data));
+    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(map((element2) => ({ element1, element2 }))))).subscribe((data) => (data));
+    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(switchMap((elementt2) => this.shared.getTodos().pipe(map((element3) => ({ element1, elementt2, element3 }))))))).subscribe((data) => console.log(data));
 
     // //ignoreElements
-    // let ignore = this.shared.getPostAlbums();
+    let ignore = this.shared.getPostAlbums();
 
-    // ignore.pipe(ignoreElements()).subscribe({
-    //   next: (value) => console.log(value),
-    //   error: (err) => console.log(err),
-    //   complete: () => console.log('ignoreElements')
-    // });
+    ignore.pipe(ignoreElements()).subscribe({
+      next: (value) => value,
+      error: (err) => (err),
+      complete: () => ('ignoreElements')
+    });
 
+    //switchMap, mergeMap, concatMap, exhaustMap,
+
+    //   -🤯mergeMap: I'm a hard worker, I can prepare multiple orders at the same time ! But I don't respect orders sequence.
+
+    // -😇concatMap: I respect orders sequence! You will get your order as soon as I finish what I'm currently doing.
+
+    // -🙄exhaustMap: I'm exhausted ! when I prepare an order, I won't listen to any other order.
+
+    // -😈switchMap: I'm mean ! your order will be in trash if I receive new one.
     //this.orders.pipe(concatMap((order) => this.prepOrder(order))).subscribe((data) => console.log(data));
 
     from([1, 2, 3]).pipe((concatMap((element) => this.http.get('https://jsonplaceholder.typicode.com/posts/' + element)))).subscribe((data) => data);
@@ -442,17 +456,20 @@ export class AppComponent implements OnInit, OnDestroy {
     let debounce = from([1, 2, 3, 4, 5]).pipe(debounceTime(20000)).subscribe((data) => data);
 
     // mapTo
-    let mapto = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), mapTo('Welcome')).subscribe((data) => console.log(data));
+    let mapto = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), mapTo('Welcome')).subscribe((data) => (data));
+
+    // pairwise
+    let pairwiseop = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), pairwise(), map(([from, to]: any) => Math.abs(Number(from.id) - Number(to.id))), map((data) => {
+      return {
+        id: data
+      }
+    })).subscribe((data) => data);
+
+    // pluck
+    this.shared.getPostAlbums().pipe(concatMap((data: any) => data), pluck('userId')).subscribe((data) => console.log(data));
+
 
   }
-
-  //   -🤯mergeMap: I'm a hard worker, I can prepare multiple orders at the same time ! But I don't respect orders sequence.
-
-  // -😇concatMap: I respect orders sequence! You will get your order as soon as I finish what I'm currently doing.
-
-  // -🙄exhaustMap: I'm exhausted ! when I prepare an order, I won't listen to any other order.
-
-  // -😈switchMap: I'm mean ! your order will be in trash if I receive new one.
 
   private prepOrder(order: any) {
     const deplayTime = Math.floor(Math.random() * 1000) + 1;

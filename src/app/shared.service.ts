@@ -25,4 +25,8 @@ export class SharedService {
   getProducts() {
     return this.http.get('https://fakestoreapi.com/products');
   }
+
+  getUsers() {
+    return this.http.get('https://jsonplaceholder.typicode.com/users');
+  }
 }
