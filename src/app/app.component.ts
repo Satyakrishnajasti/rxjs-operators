@@ -261,15 +261,15 @@ export class AppComponent implements OnInit, OnDestroy {
     let fork = forkJoin([posts, albums, album]).pipe(take(1));
 
     // Mergemap
-    // let mergeMapOp = this.shared.getPostAlbums().pipe(
-    //   switchMap((data: any) => data),
-    //   filter((data: any) => data.id == 10),
-    //   mergeMap((data) =>
-    //     this.http.get(
-    //       `https://jsonplaceholder.typicode.com/posts?userId=${data.userId}`
-    //     )
-    //   )
-    // );
+    let mergeMapOp = this.shared.getPostAlbums().pipe(
+      switchMap((data: any) => data),
+      filter((data: any) => data.id == 10),
+      mergeMap((data) =>
+        this.http.get(
+          `https://jsonplaceholder.typicode.com/posts?userId=${data.userId}`
+        )
+      )
+    );
 
     // SwitchMap
     let switchOp = this.shared.getPostAlbums().pipe(
@@ -407,12 +407,12 @@ export class AppComponent implements OnInit, OnDestroy {
     const merged = merge(item1, item2);
 
     // Partition
-    // let part = this.shared.getPostAlbums();
-    // part.subscribe((data: any) => {
-    //   const [even, odd] = partition(data, (value: any, index: number) => index > 0 && index < 10);
-    //   even.subscribe((data) => console.log(data));
-    //   odd.subscribe((data) => console.log(data));
-    // });
+    let part = this.shared.getPostAlbums();
+    part.subscribe((data: any) => {
+      const [even, odd] = partition(data, (value: any, index: number) => index > 0 && index < 10);
+      even.subscribe((data) => console.log(data));
+      odd.subscribe((data) => console.log(data));
+    });
 
     //elementAt
     let element = this.shared.getPostAlbums();
