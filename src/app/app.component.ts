@@ -49,7 +49,9 @@ import {
   buffer,
   mapTo,
   pairwise,
-  pluck
+  pluck,
+  groupBy,
+  toArray
 } from 'rxjs';
 import { SharedService } from './shared.service';
 
@@ -79,7 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private $destroy = new Subject();
   public userId?: number;
 
-  protected Operators: Operators[] = [
+  protected Operators: { name: string }[] = [
     {
       name: 'filter',
     },
@@ -196,6 +198,12 @@ export class AppComponent implements OnInit, OnDestroy {
     },
     {
       name: 'pluck'
+    },
+    {
+      name: 'pairwise'
+    },
+    {
+      name: 'groupBy'
     }
   ];
 
@@ -428,7 +436,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // switchMap
     this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(map((element2) => ({ element1, element2 }))))).subscribe((data) => (data));
-    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(switchMap((elementt2) => this.shared.getTodos().pipe(map((element3) => ({ element1, elementt2, element3 }))))))).subscribe((data) => console.log(data));
+    this.shared.getPostAlbums().pipe(switchMap((element1) => this.shared.getPostsData().pipe(switchMap((elementt2) => this.shared.getTodos().pipe(map((element3) => ({ element1, elementt2, element3 }))))))).subscribe((data) => (data));
 
     // //ignoreElements
     let ignore = this.shared.getPostAlbums();
@@ -466,7 +474,10 @@ export class AppComponent implements OnInit, OnDestroy {
     })).subscribe((data) => data);
 
     // pluck
-    this.shared.getPostAlbums().pipe(concatMap((data: any) => data), pluck('userId')).subscribe((data) => console.log(data));
+    this.shared.getPostAlbums().pipe(concatMap((data: any) => data), pluck('userId')).subscribe((data) => (data));
+
+    //groupBy
+    this.shared.getPostAlbums().pipe(concatMap((data: any) => data), groupBy((data: any) => data.userId), mergeMap((data) => data.pipe(toArray()))).subscribe((data) => console.log(data));
 
 
   }

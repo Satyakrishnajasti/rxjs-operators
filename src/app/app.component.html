@@ -1,13 +1,16 @@
 <h1 class="text-center fw-bold bg-dark text-white p-1 mb-0 sticky-top">
   RXJS Operators
 </h1>
-<div class="container-fluid border border-dark-subtle" *ngFor="let ope of Operators; let i = index">
-  <h5 *ngIf="i < 9; else remin" class="mt-4 d-flex align-items-center">
+
+
+<div class="container-fluid border border-dark-subtle d-flex align-self-center"
+  *ngFor="let ope of Operators; let i = index">
+  <h5 *ngIf="i < 9; else remin" class="mt-4 align-items-center flex-row ms-5">
     <span class="border rounded-circle p-1 border-dark bg-dark text-white me-1">0{{ i + 1 }}</span>
     {{ ope.name }}
   </h5>
   <ng-template #remin>
-    <h5 class="d-flex align-items-center mt-4">
+    <h5 class="d-flex align-items-center mt-4 ms-5">
       <span class="border rounded-circle p-1 border-dark me-1 bg-dark text-white">
         {{ i + 1 }}
       </span>
