@@ -45,15 +45,15 @@ import {
   ignoreElements,
   exhaustMap,
   debounceTime,
-  sampleTime,
-  buffer,
   mapTo,
   pairwise,
   pluck,
   groupBy,
-  toArray
+  toArray,
+  windowCount
 } from 'rxjs';
 import { SharedService } from './shared.service';
+import { SubjectComponent } from './subject/subject.component';
 
 export interface Model {
   id: number;
@@ -68,7 +68,7 @@ export interface Operators {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, SubjectComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.sass'],
   providers: [SharedService],
@@ -418,8 +418,8 @@ export class AppComponent implements OnInit, OnDestroy {
     let part = this.shared.getPostAlbums();
     part.subscribe((data: any) => {
       const [even, odd] = partition(data, (value: any, index: number) => index > 0 && index < 10);
-      even.subscribe((data) => console.log(data));
-      odd.subscribe((data) => console.log(data));
+      even.subscribe((data) => (data));
+      odd.subscribe((data) => (data));
     });
 
     //elementAt
@@ -467,17 +467,19 @@ export class AppComponent implements OnInit, OnDestroy {
     let mapto = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), mapTo('Welcome')).subscribe((data) => (data));
 
     // pairwise
-    let pairwiseop = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), pairwise(), map(([from, to]: any) => Math.abs(Number(from.id) - Number(to.id))), map((data) => {
+    let pairwiseop = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), pairwise(), map(([from, to]: any) => Math.abs(Number(from.id) + Number(to.id))), map((data) => {
       return {
         id: data
       }
-    })).subscribe((data) => data);
+    })).subscribe((data) => (data));
 
     // pluck
     this.shared.getPostAlbums().pipe(concatMap((data: any) => data), pluck('userId')).subscribe((data) => (data));
 
     //groupBy
-    this.shared.getPostAlbums().pipe(concatMap((data: any) => data), groupBy((data: any) => data.userId), mergeMap((data) => data.pipe(toArray()))).subscribe((data) => console.log(data));
+    this.shared.getPostAlbums().pipe(concatMap((data: any) => data), groupBy((data: any) => data.userId), mergeMap((data) => data.pipe(toArray()))).subscribe((data) => (data));
+
+
 
 
   }
