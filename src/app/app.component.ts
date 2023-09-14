@@ -50,7 +50,10 @@ import {
   pluck,
   groupBy,
   toArray,
-  windowCount
+  windowCount,
+  audit,
+  auditTime,
+  sample
 } from 'rxjs';
 import { SharedService } from './shared.service';
 import { SubjectComponent } from './subject/subject.component';
@@ -461,7 +464,7 @@ export class AppComponent implements OnInit, OnDestroy {
     from([1, 2, 3]).pipe((concatMap((element) => this.http.get('https://jsonplaceholder.typicode.com/posts/' + element)))).subscribe((data) => data);
 
     // debounceTime
-    let debounce = from([1, 2, 3, 4, 5]).pipe(debounceTime(20000)).subscribe((data) => data);
+    let debounce = from([1, 2, 3, 4, 5]).pipe(debounceTime(20000)).subscribe((data) => console.log(data));
 
     // mapTo
     let mapto = this.shared.getPostAlbums().pipe(concatMap((data: any) => data), mapTo('Welcome')).subscribe((data) => (data));
@@ -479,9 +482,12 @@ export class AppComponent implements OnInit, OnDestroy {
     //groupBy
     this.shared.getPostAlbums().pipe(concatMap((data: any) => data), groupBy((data: any) => data.userId), mergeMap((data) => data.pipe(toArray()))).subscribe((data) => (data));
 
+    //audit
+    // this.shared.getNews().pipe(audit((element) => interval(1000))).subscribe((data) => console.log(data));
+    range(1, 100).pipe(audit((e) => interval(5000))).subscribe((data) => console.log(data));
 
-
-
+    //auditTime
+    range(1, 100).pipe(auditTime(10000)).subscribe((data) => console.log(data));
   }
 
   private prepOrder(order: any) {
